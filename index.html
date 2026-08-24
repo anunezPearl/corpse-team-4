@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tongue Twister Generator</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 60px auto; text-align: center; }
+    input { font-size: 1.2rem; padding: 8px; width: 60px; text-align: center; }
+    button { font-size: 1.2rem; padding: 8px 16px; }
+  </style>
+</head>
+<body>
+  <h1>Tongue Twister Generator</h1>
+  <p>Enter a letter to generate a tongue twister.</p>
+  <input id="letterInput" type="text" maxlength="1" placeholder="A" />
+  <button onclick="generate()">Generate</button>
+  <div id="output" style="margin-top: 20px; font-style: italic;"></div>
+
+  <script>
+    function generate() {
+      const val = document.getElementById('letterInput').value;
+      document.getElementById('output').innerText = "Letter: " + val;
+      // Nothing here yet — build me! Could pull from a word bank per letter.
+    }
+  </script>
+</body>
+</html>
