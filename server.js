@@ -1,4 +1,4 @@
-// Zero-dependency local dev server + OpenAI proxy.
+// Zero-dependency local dev server + LiteLLM proxy.
 // Keeps the API key server-side so it never reaches the browser or the repo.
 'use strict';
 
@@ -7,6 +7,11 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 8787;
+
+const CAST_NOTE =
+  ' Weave the names Ido, Jermain, and Bharati into the sentence as the ' +
+  'three recurring composers on the Committee. Make their roles playful and ' +
+  'natural; the names do not count toward the mostly-{L} word rule.';
 
 // The four DSCH-motif hearings. Difficulty escalates; each clean pass plays
 // one note of Shostakovich's D-Es-C-H musical signature.
@@ -19,7 +24,7 @@ const HEARINGS = [
       'Write ONE short, gentle tongue twister (8 to 12 words) using mostly ' +
       'words that start with the letter "{L}". Keep the sounds soft and easy ' +
       'to say. Exactly one word in the twister must be a real German word of ' +
-      'at least 6 syllables. Return only the twister text, no quotes, no preamble.',
+      'at least 6 syllables. Return only the twister text, no quotes, no preamble.' + CAST_NOTE,
   },
   {
     name: 'The House Committee',
@@ -29,7 +34,7 @@ const HEARINGS = [
       'Write ONE tongue twister (10 to 14 words) using mostly words starting ' +
       'with the letter "{L}". Make it moderately tricky, with a couple of ' +
       'repeated syllables. Exactly one word in the twister must be a real German ' +
-      'word of at least 6 syllables. Return only the twister text, no quotes, no preamble.',
+      'word of at least 6 syllables. Return only the twister text, no quotes, no preamble.' + CAST_NOTE,
   },
   {
     name: 'The Congress Hears You',
@@ -39,7 +44,7 @@ const HEARINGS = [
       'Write ONE tricky tongue twister (12 to 16 words) using mostly words ' +
       'starting with the letter "{L}", stacking similar-sounding syllables ' +
       'that are easy to trip over. Exactly one word in the twister must be a ' +
-      'real German word of at least 6 syllables. Return only the twister text, no quotes, no preamble.',
+      'real German word of at least 6 syllables. Return only the twister text, no quotes, no preamble.' + CAST_NOTE,
   },
   {
     name: 'Muddle Instead of Music',
@@ -50,14 +55,16 @@ const HEARINGS = [
       'mostly words starting with the letter "{L}". Stack plosives and ' +
       'consonant clusters, and alternate near-identical syllables, to make it ' +
       'maximally hard to say quickly. Exactly one word in the twister must be a ' +
-      'real German word of at least 6 syllables. Return only the twister text, no quotes, no preamble.',
+      'real German word of at least 6 syllables. Return only the twister text, no quotes, no preamble.' + CAST_NOTE,
   },
 ];
 
 function loadEnvLocal() {
-  const envPath = path.join(__dirname, '.env.local');
+  const envPath = ['.env.local', '.env', '.env.example']
+    .map((filename) => path.join(__dirname, filename))
+    .find((filename) => fs.existsSync(filename));
   const env = {};
-  if (!fs.existsSync(envPath)) return env;
+  if (!envPath) return env;
   for (const rawLine of fs.readFileSync(envPath, 'utf8').split('\n')) {
     const line = rawLine.trim();
     if (!line || line.startsWith('#')) continue;
@@ -74,7 +81,8 @@ function loadEnvLocal() {
 }
 
 const localEnv = loadEnvLocal();
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || localEnv.OPENAI_API_KEY;
+const LITELLM_BASE_URL = process.env.LITELLM_BASE_URL || localEnv.LITELLM_BASE_URL;
+const LITELLM_API_KEY = process.env.LITELLM_API_KEY || localEnv.LITELLM_API_KEY;
 
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
@@ -118,8 +126,8 @@ async function handleTwister(req, res) {
     sendJson(res, 400, { error: 'invalid hearingIndex' });
     return;
   }
-  if (!OPENAI_API_KEY) {
-    sendJson(res, 500, { error: 'OPENAI_API_KEY not configured. Add it to .env.local (see .env.example).' });
+  if (!LITELLM_BASE_URL || !LITELLM_API_KEY) {
+    sendJson(res, 500, { error: 'LiteLLM is not configured. Add LITELLM_BASE_URL and LITELLM_API_KEY to .env.local.' });
     return;
   }
 
@@ -127,21 +135,21 @@ async function handleTwister(req, res) {
 
   let upstream;
   try {
-    upstream = await fetch('https://api.openai.com/v1/chat/completions', {
+    upstream = await fetch(`${LITELLM_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${LITELLM_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'openai/gpt-4.1-mini-2025-04-14',
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 80,
         temperature: 1,
       }),
     });
   } catch (err) {
-    sendJson(res, 502, { error: `could not reach OpenAI: ${err.message}` });
+    sendJson(res, 502, { error: `could not reach LiteLLM: ${err.message}` });
     return;
   }
 
@@ -188,7 +196,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Comrade Composer server running: http://localhost:${PORT}`);
-  if (!OPENAI_API_KEY) {
-    console.log('WARNING: no OPENAI_API_KEY found. Add one to .env.local (see .env.example).');
+  if (!LITELLM_BASE_URL || !LITELLM_API_KEY) {
+    console.log('WARNING: LiteLLM is not configured. Add LITELLM_BASE_URL and LITELLM_API_KEY to .env.local.');
   }
 });

@@ -4,6 +4,12 @@ Pick a starting letter, get a tongue twister using mostly that letter.
 
 ## Status
 
+**Round 2 (Mostafa): Sopranos trial — Tony tests your loyalty with tongue twisters.**
+
+You're summoned to a sit-down with Tony Soprano. He gives you four tongue twisters, each harder than the last. Nail them all before the countdown runs out and you're "approved" — loyal, not a rat. Stumble and you get "denounced" and have to retry. Clear all four without a single denunciation and Tony reveals you're "made" — a handshake from the boss and a hidden motif (the Sopranos theme whistled across four notes) plays as you're inducted into the family.
+
+Same tongue-twister mechanics as Round 1, completely reskinned as a mob loyalty test. UI now has a New Jersey diner aesthetic, mob-speak, Tony's silhouette, and a "you're made" ending instead of the Shostakovich one.
+
 **Round 2 (Team 3): every twister now smuggles in one long German word.**
 
 Each of the four hearings' prompts now requires exactly one word in the
@@ -30,7 +36,7 @@ above is scoring and theme around that same core loop.
 - `index.html` — the whole UI: hearing flow, countdown meter, Web Speech API
   scoring, Web Audio tones, all inline `<style>`/`<script>`, no build step.
 - `server.js` — a small zero-dependency Node server. Serves `index.html` and
-  proxies twister requests to OpenAI so the API key never reaches the browser
+  proxies twister requests to LiteLLM so the API key never reaches the browser
   or the repo.
 - `.env.example` — template for required environment variables.
 
@@ -38,7 +44,7 @@ above is scoring and theme around that same core loop.
 
 ```
 cp .env.example .env.local
-# edit .env.local and set a real OPENAI_API_KEY
+# edit .env.local and set LITELLM_BASE_URL and LITELLM_API_KEY
 node server.js
 ```
 
