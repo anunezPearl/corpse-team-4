@@ -1,26 +1,1011 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Tongue Twister Generator</title>
-  <style>
-    body { font-family: sans-serif; max-width: 500px; margin: 60px auto; text-align: center; }
-    input { font-size: 1.2rem; padding: 8px; width: 60px; text-align: center; }
-    button { font-size: 1.2rem; padding: 8px 16px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ЯЗЫКОЛОМ-8 — A Hearing Before the Union of Composers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #14100f;
+    --panel: #1d1714;
+    --paper: #efe6d3;
+    --paper-line: rgba(90, 60, 30, 0.18);
+    --red: #a3211b;
+    --red-bright: #d62b22;
+    --gold: #c9a227;
+    --gold-bright: #e9c765;
+    --ink: #2a201a;
+    --fg: #ede3d0;
+    --muted: #a9987f;
+    --ok: #4caf50;
+    --warn: #d99a1f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse at 50% -10%, #2a1c14 0%, var(--bg) 55%),
+      var(--bg);
+    color: var(--fg);
+    font-family: 'Courier Prime', monospace;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 32px 16px 80px;
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 640px;
+  }
+
+  h1, h2, h3 { font-family: 'Playfair Display', serif; margin: 0; }
+
+  .title-block { text-align: center; margin-bottom: 28px; }
+  .title-block h1 {
+    font-size: clamp(2rem, 6vw, 2.9rem);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: var(--gold-bright);
+    text-shadow: 0 0 18px rgba(201, 162, 39, 0.35);
+  }
+  .title-block .subtitle {
+    margin-top: 6px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid #3a2c22;
+    border-radius: 10px;
+    padding: 28px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+  }
+
+  /* ---------- Letter select ---------- */
+  .comeback-banner {
+    background: rgba(201,162,39,0.1);
+    border: 1px solid var(--gold);
+    color: var(--gold-bright);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .letter-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    align-items: center;
+    margin: 22px 0 8px;
+  }
+
+  #letterInput {
+    width: 78px;
+    height: 78px;
+    text-align: center;
+    font-size: 2.4rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 800;
+    background: var(--paper);
+    color: var(--ink);
+    border: 3px solid var(--gold);
+    border-radius: 8px;
+    text-transform: uppercase;
+  }
+  #letterInput:focus { outline: none; box-shadow: 0 0 0 3px rgba(201,162,39,0.4); }
+
+  button {
+    font-family: 'Courier Prime', monospace;
+    cursor: pointer;
+  }
+
+  .btn {
+    border: none;
+    border-radius: 6px;
+    padding: 12px 18px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-gold { background: var(--gold); color: #1a1310; }
+  .btn-gold:hover { background: var(--gold-bright); box-shadow: 0 0 16px rgba(201,162,39,0.5); }
+  .btn-red { background: var(--red); color: var(--fg); }
+  .btn-red:hover { background: var(--red-bright); box-shadow: 0 0 18px rgba(214,43,34,0.55); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid #4a3a2e;
+  }
+  .btn-ghost:hover { color: var(--fg); border-color: var(--gold); }
+  .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+
+  .begin-row { display: flex; justify-content: center; margin-top: 22px; }
+  .begin-row .btn { width: 100%; max-width: 280px; font-size: 1.05rem; padding: 14px; }
+
+  .error-msg {
+    color: var(--red-bright);
+    text-align: center;
+    font-size: 0.85rem;
+    min-height: 1.2em;
+    margin-top: 10px;
+  }
+
+  .rules-note {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+
+  /* ---------- Hearing screen ---------- */
+  .hearing-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .hearing-label { color: var(--gold-bright); font-size: 0.85rem; letter-spacing: 0.05em; }
+  .combo-label { color: var(--muted); font-size: 0.8rem; }
+  .combo-label b { color: var(--gold-bright); }
+
+  .censor-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0 20px;
+  }
+
+  .portrait-frame {
+    position: relative;
+    width: 84px;
+    height: 96px;
+    flex: 0 0 auto;
+    border: 3px double var(--gold);
+    border-radius: 4px;
+    background: #0f0b09;
+    overflow: hidden;
+  }
+  .portrait-half {
+    position: absolute;
+    top: 0;
+    width: 84px;
+    height: 96px;
+    background: #17110d;
+    transition: transform 1.1s cubic-bezier(.2,.8,.2,1), opacity 1.1s ease;
+  }
+  .portrait-half.left { left: 0; clip-path: inset(0 42px 0 0); }
+  .portrait-half.right { left: 0; clip-path: inset(0 0 0 42px); }
+  .portrait-face {
+    position: absolute;
+    top: 14px; left: 22px;
+    width: 40px; height: 46px;
+    background: #cbb896;
+    border-radius: 45% 45% 40% 40%;
+  }
+  .portrait-brow {
+    position: absolute; top: 26px; left: 26px;
+    width: 32px; height: 4px;
+    background: #241a12;
+    border-radius: 2px;
+    transform: rotate(-4deg);
+  }
+  .portrait-shoulders {
+    position: absolute;
+    bottom: 0; left: 6px;
+    width: 72px; height: 30px;
+    background: #241a12;
+    border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+  }
+  .portrait-frame.cracked .portrait-half.left { transform: translateX(-90px) rotate(-8deg); opacity: 0.3; }
+  .portrait-frame.cracked .portrait-half.right { transform: translateX(90px) rotate(8deg); opacity: 0.3; }
+  .portrait-glow {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle, rgba(233,199,101,0.9) 0%, rgba(233,199,101,0) 70%);
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .portrait-frame.cracked .portrait-glow { opacity: 1; }
+
+  .meter-col { flex: 1; }
+  .meter-title { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 5px; }
+  .meter-track {
+    height: 14px;
+    background: #0f0b09;
+    border: 1px solid #3a2c22;
+    border-radius: 7px;
+    overflow: hidden;
+  }
+  .meter-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #4caf50, #c9a227);
+    transition: width 0.2s linear, background 0.3s ease;
+  }
+  .meter-fill.warn { background: linear-gradient(90deg, #d99a1f, #d62b22); }
+  .meter-fill.danger { background: var(--red-bright); animation: pulse-danger 0.5s infinite alternate; }
+  @keyframes pulse-danger { from { opacity: 1; } to { opacity: 0.5; } }
+
+  .metronome {
+    width: 22px; height: 34px;
+    position: relative;
+    flex: 0 0 auto;
+  }
+  .metronome .pendulum {
+    position: absolute;
+    bottom: 0; left: 50%;
+    width: 2px; height: 30px;
+    background: var(--gold);
+    transform-origin: bottom center;
+    transform: rotate(-16deg);
+  }
+  .metronome.ticking .pendulum { animation: swing 1s ease-in-out infinite; }
+  .metronome .pendulum::after {
+    content: '';
+    position: absolute;
+    top: -3px; left: -3px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold-bright);
+  }
+  @keyframes swing {
+    0% { transform: rotate(-16deg); }
+    50% { transform: rotate(16deg); }
+    100% { transform: rotate(-16deg); }
+  }
+
+  /* Manuscript / twister card */
+  .manuscript {
+    position: relative;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 6px;
+    padding: 28px 22px 22px;
+    min-height: 120px;
+    background-image: repeating-linear-gradient(
+      var(--paper-line), var(--paper-line) 1px, transparent 1px, transparent 20px
+    );
+    background-position: 0 30px;
+  }
+  .manuscript .stamp-corner {
+    position: absolute; top: 8px; right: 12px;
+    font-size: 0.65rem; color: rgba(42,32,26,0.45);
+    letter-spacing: 0.08em;
+  }
+  .twister-text {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.35rem;
+    line-height: 1.75;
+    min-height: 2.6em;
+  }
+  .twister-text .w { transition: color 0.2s ease; }
+  .twister-text .w.matched { color: var(--ok); text-decoration: underline; text-decoration-color: rgba(76,175,80,0.5); }
+  .twister-text .w.missed { color: var(--red); text-decoration: line-through; }
+  .twister-loading { color: #6b5a48; font-style: italic; }
+
+  .perform-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 22px;
+    flex-wrap: wrap;
+  }
+  #performBtn.listening {
+    animation: mic-pulse 0.8s infinite;
+  }
+  @keyframes mic-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(214,43,34,0.55); }
+    100% { box-shadow: 0 0 0 16px rgba(214,43,34,0); }
+  }
+
+  .type-fallback {
+    display: none;
+    margin-top: 14px;
+    gap: 8px;
+  }
+  .type-fallback.active { display: flex; }
+  .type-fallback input {
+    flex: 1;
+    background: #0f0b09;
+    border: 1px solid #3a2c22;
+    color: var(--fg);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'Courier Prime', monospace;
+  }
+
+  .toggle-type {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    text-decoration: underline;
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+  }
+  .toggle-type:hover { color: var(--fg); }
+
+  .status-line {
+    text-align: center;
+    min-height: 1.4em;
+    margin-top: 12px;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  /* Verdict overlay */
+  .verdict-overlay {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    z-index: 50;
+  }
+  .verdict-overlay.flash-fail { animation: bw-flash 0.9s ease; }
+  @keyframes bw-flash {
+    0% { backdrop-filter: grayscale(0); }
+    30% { backdrop-filter: grayscale(1) brightness(0.6); background: rgba(0,0,0,0.35); }
+    100% { backdrop-filter: grayscale(0); background: rgba(0,0,0,0); }
+  }
+  .verdict-overlay.flash-pass { animation: green-flash 0.7s ease; }
+  @keyframes green-flash {
+    0% { background: rgba(76,175,80,0); }
+    30% { background: rgba(76,175,80,0.18); }
+    100% { background: rgba(76,175,80,0); }
+  }
+  .stamp {
+    font-family: 'Playfair Display', serif;
+    font-weight: 800;
+    font-size: clamp(1.6rem, 6vw, 2.6rem);
+    padding: 10px 26px;
+    border: 6px solid currentColor;
+    border-radius: 6px;
+    transform: scale(2.4) rotate(-10deg);
+    opacity: 0;
+  }
+  .stamp.approved { color: var(--ok); }
+  .stamp.denied { color: var(--red-bright); }
+  .stamp.show {
+    animation: stamp-slam 1.1s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+  @keyframes stamp-slam {
+    0% { transform: scale(2.4) rotate(-10deg); opacity: 0; }
+    35% { transform: scale(0.92) rotate(-8deg); opacity: 1; }
+    50% { transform: scale(1.05) rotate(-8deg); opacity: 1; }
+    80% { transform: scale(1) rotate(-8deg); opacity: 1; }
+    100% { transform: scale(1) rotate(-8deg); opacity: 0; }
+  }
+
+  .stage.shake { animation: shake 0.4s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(4px); }
+  }
+
+  /* ---------- Ending screen ---------- */
+  .ending-card { text-align: center; }
+  .ending-card h2 {
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    color: var(--gold-bright);
+    margin-bottom: 10px;
+  }
+  .ending-card p { color: var(--muted); line-height: 1.6; }
+
+  .staff {
+    margin: 26px auto;
+    width: 100%;
+    max-width: 420px;
+    height: 90px;
+    position: relative;
+  }
+  .staff .line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: rgba(233,199,101,0.35);
+  }
+  .staff .note {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--gold-bright);
+    box-shadow: 0 0 0 rgba(233,199,101,0);
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  .staff.reveal .note {
+    animation: note-pop 0.6s ease forwards;
+  }
+  @keyframes note-pop {
+    to { opacity: 1; transform: scale(1); box-shadow: 0 0 14px rgba(233,199,101,0.8); }
+  }
+
+  .ending-actions { margin-top: 24px; }
+
+  footer {
+    text-align: center;
+    color: #5c4c3c;
+    font-size: 0.72rem;
+    margin-top: 26px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .metronome.ticking .pendulum,
+    .verdict-overlay.flash-fail,
+    .verdict-overlay.flash-pass,
+    .stage.shake,
+    .stamp.show { animation: none !important; }
+  }
+</style>
 </head>
 <body>
-  <h1>Tongue Twister Generator</h1>
-  <p>Enter a letter to generate a tongue twister.</p>
-  <input id="letterInput" type="text" maxlength="1" placeholder="A" />
-  <button onclick="generate()">Generate</button>
-  <div id="output" style="margin-top: 20px; font-style: italic;"></div>
 
-  <script>
-    function generate() {
-      const val = document.getElementById('letterInput').value;
-      document.getElementById('output').innerText = "Letter: " + val;
-      // Nothing here yet — build me! Could pull from a word bank per letter.
+<div class="stage" id="stage">
+
+  <div class="title-block">
+    <h1>ЯЗЫКОЛОМ-8</h1>
+    <div class="subtitle">A hearing before the Union of Soviet Composers</div>
+  </div>
+
+  <!-- SCREEN 1: letter select -->
+  <section class="screen active" id="screen-select">
+    <div class="card">
+      <div class="comeback-banner" id="comebackBanner" style="display:none;"></div>
+      <h2 style="text-align:center;">Submit your letter for review</h2>
+      <p style="text-align:center; color: var(--muted); font-size: 0.88rem;">
+        The Censor will draft four compositions from it. Perform each one aloud, cleanly,
+        before the Committee's patience runs out.
+      </p>
+      <div class="letter-row">
+        <input id="letterInput" type="text" maxlength="1" placeholder="P" autocomplete="off" />
+        <button class="btn btn-ghost" id="randomBtn" type="button">🎲 Random</button>
+      </div>
+      <div class="error-msg" id="selectError"></div>
+      <div class="begin-row">
+        <button class="btn btn-red" id="beginBtn" type="button">Begin the Hearing</button>
+      </div>
+      <p class="rules-note">
+        Four hearings. Each clean performance advances a hidden four-note motif.
+        Stumble, and the file simply reads "reviewed" — you may always try again.
+      </p>
+    </div>
+  </section>
+
+  <!-- SCREEN 2: hearing / gameplay -->
+  <section class="screen" id="screen-hearing">
+    <div class="card">
+      <div class="hearing-header">
+        <span class="hearing-label" id="hearingLabel">HEARING I OF IV — The Rehearsal</span>
+        <span class="combo-label">Clean streak: <b id="comboCount">0</b></span>
+      </div>
+
+      <div class="censor-wrap">
+        <div class="portrait-frame" id="portraitFrame">
+          <div class="portrait-glow"></div>
+          <div class="portrait-half left">
+            <div class="portrait-shoulders"></div>
+            <div class="portrait-face"></div>
+            <div class="portrait-brow"></div>
+          </div>
+          <div class="portrait-half right">
+            <div class="portrait-shoulders"></div>
+            <div class="portrait-face"></div>
+            <div class="portrait-brow"></div>
+          </div>
+        </div>
+        <div class="meter-col">
+          <div class="meter-title">PARTY PATIENCE</div>
+          <div class="meter-track"><div class="meter-fill" id="meterFill"></div></div>
+        </div>
+        <div class="metronome" id="metronome"><div class="pendulum"></div></div>
+      </div>
+
+      <div class="manuscript">
+        <div class="stamp-corner">DELO No. <span id="fileNumber">0000</span></div>
+        <div class="twister-text" id="twisterText"><span class="twister-loading">The Censor drafts your score…</span></div>
+      </div>
+
+      <div class="perform-row">
+        <button class="btn btn-red" id="performBtn" type="button" disabled>🎙️ Perform</button>
+        <button class="btn btn-ghost" id="skipTimerBtn" type="button" style="display:none;">Submit</button>
+      </div>
+
+      <div class="type-fallback" id="typeFallback">
+        <input type="text" id="typeInput" placeholder="Type what you performed…" autocomplete="off" />
+        <button class="btn btn-gold" id="typeSubmitBtn" type="button">Submit</button>
+      </div>
+
+      <button class="toggle-type" id="toggleTypeBtn" type="button">⌨️ No microphone? Type your performance instead</button>
+
+      <div class="status-line" id="statusLine"></div>
+    </div>
+  </section>
+
+  <!-- SCREEN 3: ending -->
+  <section class="screen" id="screen-ending">
+    <div class="card ending-card">
+      <h2 id="endingTitle">APPROVED FOR PERFORMANCE</h2>
+      <p id="endingBody"></p>
+      <div class="staff" id="staff"></div>
+      <div class="ending-actions">
+        <button class="btn btn-gold" id="playAgainBtn" type="button">New Hearing</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>All compositions generated on demand. No composers were harmed. DSCH: D–E♭–C–B.</footer>
+</div>
+
+<div class="verdict-overlay" id="verdictOverlay">
+  <div class="stamp" id="stampEl">НЕ ОДОБРЕНО</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- DOM ----------
+  const screens = {
+    select: document.getElementById('screen-select'),
+    hearing: document.getElementById('screen-hearing'),
+    ending: document.getElementById('screen-ending'),
+  };
+  const stage = document.getElementById('stage');
+  const letterInput = document.getElementById('letterInput');
+  const randomBtn = document.getElementById('randomBtn');
+  const beginBtn = document.getElementById('beginBtn');
+  const selectError = document.getElementById('selectError');
+  const comebackBanner = document.getElementById('comebackBanner');
+
+  const hearingLabel = document.getElementById('hearingLabel');
+  const comboCount = document.getElementById('comboCount');
+  const portraitFrame = document.getElementById('portraitFrame');
+  const meterFill = document.getElementById('meterFill');
+  const metronomeEl = document.getElementById('metronome');
+  const twisterText = document.getElementById('twisterText');
+  const fileNumber = document.getElementById('fileNumber');
+  const performBtn = document.getElementById('performBtn');
+  const typeFallback = document.getElementById('typeFallback');
+  const typeInput = document.getElementById('typeInput');
+  const typeSubmitBtn = document.getElementById('typeSubmitBtn');
+  const toggleTypeBtn = document.getElementById('toggleTypeBtn');
+  const statusLine = document.getElementById('statusLine');
+
+  const endingTitle = document.getElementById('endingTitle');
+  const endingBody = document.getElementById('endingBody');
+  const staffEl = document.getElementById('staff');
+  const playAgainBtn = document.getElementById('playAgainBtn');
+
+  const verdictOverlay = document.getElementById('verdictOverlay');
+  const stampEl = document.getElementById('stampEl');
+
+  const ROMAN = ['I', 'II', 'III', 'IV'];
+  const THRESHOLD = 0.7;
+
+  // ---------- state ----------
+  let hearings = [];
+  let letter = '';
+  let hearingIndex = 0;
+  let combo = 0;
+  let anyFail = false;
+  let currentTwister = '';
+  let timerHandle = null;
+  let tickHandle = null;
+  let timeLeft = 0;
+  let timeTotal = 0;
+  let recognition = null;
+  let listening = false;
+
+  function showScreen(name) {
+    Object.values(screens).forEach((s) => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  // ---------- audio ----------
+  let audioCtx = null;
+  function ctx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    return audioCtx;
+  }
+  function playTone(freq, duration, type, delay) {
+    try {
+      const c = ctx();
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      const start = c.currentTime + (delay || 0);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.28, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      osc.connect(gain).connect(c.destination);
+      osc.start(start);
+      osc.stop(start + duration + 0.05);
+    } catch { /* audio unavailable, silently skip */ }
+  }
+  function playTick() { playTone(1000, 0.03, 'square', 0); }
+  function playPassNote(freq) { playTone(freq, 0.4, 'triangle', 0); }
+  function playFailBuzz() { playTone(110, 0.35, 'sawtooth', 0); }
+  function playFinaleMotif(notes) {
+    notes.forEach((f, i) => playTone(f, 0.55, 'triangle', i * 0.42));
+    const chordDelay = notes.length * 0.42 + 0.2;
+    notes.forEach((f) => playTone(f, 2.2, 'sawtooth', chordDelay));
+  }
+
+  // ---------- helpers ----------
+  function normalizeWords(str) {
+    return str.toLowerCase().replace(/[^a-z0-9'\s]/g, '').split(/\s+/).filter(Boolean);
+  }
+
+  function scoreAttempt(target, spoken) {
+    const targetWords = normalizeWords(target);
+    const spokenWords = normalizeWords(spoken);
+    let si = 0;
+    const results = targetWords.map((word) => {
+      for (let j = si; j < spokenWords.length; j++) {
+        if (spokenWords[j] === word) {
+          si = j + 1;
+          return { word, matched: true };
+        }
+      }
+      return { word, matched: false };
+    });
+    const matchedCount = results.filter((r) => r.matched).length;
+    const percent = targetWords.length ? matchedCount / targetWords.length : 0;
+    return { results, percent };
+  }
+
+  function renderTwisterPlain(text) {
+    twisterText.innerHTML = text
+      .split(/\s+/)
+      .map((w) => `<span class="w">${escapeHtml(w)}</span>`)
+      .join(' ');
+  }
+
+  function renderTwisterScored(results) {
+    twisterText.innerHTML = results
+      .map((r) => `<span class="w ${r.matched ? 'matched' : 'missed'}">${escapeHtml(r.word)}</span>`)
+      .join(' ');
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function setMeter(pct) {
+    meterFill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+    meterFill.classList.remove('warn', 'danger');
+    if (pct < 20) meterFill.classList.add('danger');
+    else if (pct < 50) meterFill.classList.add('warn');
+  }
+
+  // ---------- flow ----------
+  function resetRun() {
+    hearingIndex = 0;
+    combo = 0;
+    anyFail = false;
+    comboCount.textContent = '0';
+    portraitFrame.classList.remove('cracked');
+  }
+
+  async function fetchHearingConfig() {
+    const res = await fetch('/api/hearings');
+    if (!res.ok) throw new Error('could not load hearing config');
+    return res.json();
+  }
+
+  function updateComebackBanner() {
+    const rehab = localStorage.getItem('comrade_rehabilitated') === '1';
+    if (rehab) {
+      comebackBanner.style.display = 'block';
+      comebackBanner.textContent = 'Welcome back, Comrade Composer. Your file already reads: REHABILITATED.';
+    } else {
+      comebackBanner.style.display = 'none';
     }
-  </script>
+  }
+
+  randomBtn.addEventListener('click', () => {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    letterInput.value = alphabet[Math.floor(Math.random() * alphabet.length)];
+    selectError.textContent = '';
+  });
+
+  beginBtn.addEventListener('click', async () => {
+    const val = (letterInput.value || '').trim();
+    if (!/^[a-zA-Z]$/.test(val)) {
+      selectError.textContent = 'Submit exactly one letter, A through Z.';
+      return;
+    }
+    letter = val.toUpperCase();
+    selectError.textContent = '';
+    resetRun();
+    try {
+      hearings = await fetchHearingConfig();
+    } catch {
+      selectError.textContent = 'Could not reach the composer server. Is `node server.js` running?';
+      return;
+    }
+    showScreen('hearing');
+    startHearing();
+  });
+
+  function startHearing() {
+    const h = hearings[hearingIndex];
+    hearingLabel.textContent = `HEARING ${ROMAN[hearingIndex]} OF IV — ${h.name}`;
+    fileNumber.textContent = String(1000 + Math.floor(Math.random() * 8999));
+    performBtn.disabled = true;
+    performBtn.classList.remove('listening');
+    typeFallback.classList.remove('active');
+    statusLine.textContent = '';
+    twisterText.innerHTML = '<span class="twister-loading">The Censor drafts your score…</span>';
+    setMeter(100);
+    requestTwister(h);
+  }
+
+  async function requestTwister(h) {
+    try {
+      const res = await fetch('/api/twister', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ letter, hearingIndex }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        twisterText.innerHTML = `<span class="twister-loading">Denied: ${escapeHtml(data.error || 'unknown error')}</span>`;
+        return;
+      }
+      currentTwister = data.text || '(the Censor submitted nothing — try again)';
+      renderTwisterPlain(currentTwister);
+      performBtn.disabled = false;
+      beginTimer(h.seconds);
+    } catch (err) {
+      twisterText.innerHTML = `<span class="twister-loading">Could not reach the server: ${escapeHtml(err.message)}</span>`;
+    }
+  }
+
+  function beginTimer(seconds) {
+    clearInterval(timerHandle);
+    clearInterval(tickHandle);
+    timeTotal = seconds;
+    timeLeft = seconds;
+    setMeter(100);
+    metronomeEl.classList.add('ticking');
+    timerHandle = setInterval(() => {
+      timeLeft -= 0.1;
+      setMeter((timeLeft / timeTotal) * 100);
+      if (timeLeft <= 0) {
+        clearInterval(timerHandle);
+        onTimeUp();
+      }
+    }, 100);
+    tickHandle = setInterval(playTick, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerHandle);
+    clearInterval(tickHandle);
+    metronomeEl.classList.remove('ticking');
+  }
+
+  function onTimeUp() {
+    stopRecognition();
+    stopTimer();
+    statusLine.textContent = 'The Committee’s patience expired.';
+    settleAttempt('');
+  }
+
+  // ---------- speech ----------
+  const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function startRecognition() {
+    if (!SpeechRecognitionCtor) {
+      statusLine.textContent = 'No speech recognition in this browser — use the typing option below.';
+      typeFallback.classList.add('active');
+      return;
+    }
+    recognition = new SpeechRecognitionCtor();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    listening = true;
+    performBtn.classList.add('listening');
+    performBtn.textContent = '🎙️ Listening…';
+    statusLine.textContent = 'Speak now, Comrade.';
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      finishListening();
+      submitAttempt(transcript);
+    };
+    recognition.onerror = (event) => {
+      finishListening();
+      if (event.error === 'not-allowed' || event.error === 'audio-capture') {
+        statusLine.textContent = 'Microphone unavailable — switch to typing below.';
+        typeFallback.classList.add('active');
+      } else if (event.error === 'no-speech') {
+        statusLine.textContent = 'No speech detected. Try again before time runs out.';
+      } else {
+        statusLine.textContent = `Recognition error: ${event.error}. Try again or type it.`;
+      }
+    };
+    recognition.onend = () => finishListening();
+
+    try {
+      recognition.start();
+    } catch {
+      finishListening();
+    }
+  }
+
+  function finishListening() {
+    listening = false;
+    performBtn.classList.remove('listening');
+    performBtn.textContent = '🎙️ Perform';
+  }
+
+  function stopRecognition() {
+    if (recognition && listening) {
+      try { recognition.abort(); } catch { /* already stopped */ }
+    }
+    finishListening();
+  }
+
+  performBtn.addEventListener('click', () => {
+    if (listening) return;
+    startRecognition();
+  });
+
+  toggleTypeBtn.addEventListener('click', () => {
+    typeFallback.classList.toggle('active');
+  });
+
+  typeSubmitBtn.addEventListener('click', () => {
+    const val = typeInput.value;
+    typeInput.value = '';
+    submitAttempt(val);
+  });
+  typeInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') typeSubmitBtn.click();
+  });
+
+  function submitAttempt(spokenText) {
+    stopTimer();
+    settleAttempt(spokenText);
+  }
+
+  function settleAttempt(spokenText) {
+    const { results, percent } = scoreAttempt(currentTwister, spokenText);
+    renderTwisterScored(results);
+    const passed = percent >= THRESHOLD;
+    performBtn.disabled = true;
+
+    if (passed) {
+      handlePass();
+    } else {
+      handleFail();
+    }
+  }
+
+  function handlePass() {
+    const h = hearings[hearingIndex];
+    combo += 1;
+    comboCount.textContent = String(combo);
+    playPassNote(h.note);
+    flashOverlay('flash-pass', 'ОДОБРЕНО', 'approved');
+    statusLine.textContent = 'Approved. The Committee is, for now, satisfied.';
+    hearingIndex += 1;
+    setTimeout(() => {
+      if (hearingIndex >= hearings.length) {
+        finishRun();
+      } else {
+        startHearing();
+      }
+    }, 1300);
+  }
+
+  function handleFail() {
+    anyFail = true;
+    combo = 0;
+    comboCount.textContent = '0';
+    playFailBuzz();
+    shakeStage();
+    flashOverlay('flash-fail', 'НЕ ОДОБРЕНО', 'denied');
+    statusLine.textContent = 'Denounced. A fresh composition is being drafted.';
+    setTimeout(() => startHearing(), 1500);
+  }
+
+  function shakeStage() {
+    stage.classList.add('shake');
+    setTimeout(() => stage.classList.remove('shake'), 400);
+  }
+
+  function flashOverlay(flashClass, text, stampClass) {
+    verdictOverlay.classList.remove('flash-pass', 'flash-fail');
+    stampEl.classList.remove('show', 'approved', 'denied');
+    void verdictOverlay.offsetWidth; // restart animation
+    stampEl.textContent = text;
+    stampEl.classList.add(stampClass);
+    verdictOverlay.classList.add(flashClass);
+    stampEl.classList.add('show');
+  }
+
+  function finishRun() {
+    stopTimer();
+    if (!anyFail) {
+      localStorage.setItem('comrade_rehabilitated', '1');
+      endingTitle.textContent = 'REHABILITATED';
+      endingBody.textContent =
+        'Four hearings, not one denunciation. Somewhere under the Committee’s notice, ' +
+        'a signature got through: D–E♭–C–B. They approved the paperwork. They never heard the motif.';
+      portraitFrame.classList.add('cracked');
+      buildStaff(true);
+      playFinaleMotif(hearings.map((h) => h.note));
+    } else {
+      endingTitle.textContent = 'APPROVED FOR PERFORMANCE';
+      endingBody.textContent =
+        'All four hearings cleared, on the record. The file also notes a denunciation or two ' +
+        'along the way — which means the secret ending stayed just out of reach this time.';
+      buildStaff(false);
+    }
+    showScreen('ending');
+    updateComebackBanner();
+  }
+
+  function buildStaff(reveal) {
+    staffEl.innerHTML = '';
+    staffEl.classList.toggle('reveal', reveal);
+    for (let i = 0; i < 5; i++) {
+      const line = document.createElement('div');
+      line.className = 'line';
+      line.style.top = 10 + i * 16 + 'px';
+      staffEl.appendChild(line);
+    }
+    if (reveal) {
+      const positions = [40, 24, 56, 72]; // rough staff heights for D, Eb, C, B
+      positions.forEach((top, i) => {
+        const note = document.createElement('div');
+        note.className = 'note';
+        note.style.top = top + 'px';
+        note.style.left = 60 + i * 90 + 'px';
+        note.style.animationDelay = i * 0.5 + 's';
+        staffEl.appendChild(note);
+      });
+    }
+  }
+
+  playAgainBtn.addEventListener('click', () => {
+    letterInput.value = '';
+    selectError.textContent = '';
+    updateComebackBanner();
+    showScreen('select');
+  });
+
+  updateComebackBanner();
+})();
+</script>
+
 </body>
 </html>
