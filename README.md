@@ -4,6 +4,15 @@ Pick a starting letter, get a tongue twister using mostly that letter.
 
 ## Status
 
+**Round 2 (Team 3): every twister now smuggles in one long German word.**
+
+Each of the four hearings' prompts now requires exactly one word in the
+generated twister to be a real German word of at least 6 syllables, on top
+of the mostly-starts-with-the-chosen-letter rule. It stays part of the same
+sentence you have to speak/type before the countdown, so the German word is
+just one more thing to trip over — the hearing flow, scoring, and secret
+ending below are otherwise unchanged.
+
 **Round 1 (Mostafa): built the generator, wrapped it in a Soviet-composer hearing.**
 
 You submit a letter. The app drafts four tongue twisters for it, one per "hearing,"

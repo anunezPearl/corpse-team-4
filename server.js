@@ -18,7 +18,8 @@ const HEARINGS = [
     instruction:
       'Write ONE short, gentle tongue twister (8 to 12 words) using mostly ' +
       'words that start with the letter "{L}". Keep the sounds soft and easy ' +
-      'to say. Return only the twister text, no quotes, no preamble.',
+      'to say. Exactly one word in the twister must be a real German word of ' +
+      'at least 6 syllables. Return only the twister text, no quotes, no preamble.',
   },
   {
     name: 'The House Committee',
@@ -27,7 +28,8 @@ const HEARINGS = [
     instruction:
       'Write ONE tongue twister (10 to 14 words) using mostly words starting ' +
       'with the letter "{L}". Make it moderately tricky, with a couple of ' +
-      'repeated syllables. Return only the twister text, no quotes, no preamble.',
+      'repeated syllables. Exactly one word in the twister must be a real German ' +
+      'word of at least 6 syllables. Return only the twister text, no quotes, no preamble.',
   },
   {
     name: 'The Congress Hears You',
@@ -36,7 +38,8 @@ const HEARINGS = [
     instruction:
       'Write ONE tricky tongue twister (12 to 16 words) using mostly words ' +
       'starting with the letter "{L}", stacking similar-sounding syllables ' +
-      'that are easy to trip over. Return only the twister text, no quotes, no preamble.',
+      'that are easy to trip over. Exactly one word in the twister must be a ' +
+      'real German word of at least 6 syllables. Return only the twister text, no quotes, no preamble.',
   },
   {
     name: 'Muddle Instead of Music',
@@ -46,7 +49,8 @@ const HEARINGS = [
       'Write ONE brutally difficult tongue twister (14 to 20 words) using ' +
       'mostly words starting with the letter "{L}". Stack plosives and ' +
       'consonant clusters, and alternate near-identical syllables, to make it ' +
-      'maximally hard to say quickly. Return only the twister text, no quotes, no preamble.',
+      'maximally hard to say quickly. Exactly one word in the twister must be a ' +
+      'real German word of at least 6 syllables. Return only the twister text, no quotes, no preamble.',
   },
 ];
 
