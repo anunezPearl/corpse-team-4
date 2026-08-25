@@ -4,6 +4,12 @@ Pick a starting letter, get a tongue twister using mostly that letter.
 
 ## Status
 
+**Round 2 (Mostafa): Sopranos trial — Tony tests your loyalty with tongue twisters.**
+
+You're summoned to a sit-down with Tony Soprano. He gives you four tongue twisters, each harder than the last. Nail them all before the countdown runs out and you're "approved" — loyal, not a rat. Stumble and you get "denounced" and have to retry. Clear all four without a single denunciation and Tony reveals you're "made" — a handshake from the boss and a hidden motif (the Sopranos theme whistled across four notes) plays as you're inducted into the family.
+
+Same tongue-twister mechanics as Round 1, completely reskinned as a mob loyalty test. UI now has a New Jersey diner aesthetic, mob-speak, Tony's silhouette, and a "you're made" ending instead of the Shostakovich one.
+
 **Round 2 (Team 3): every twister now smuggles in one long German word.**
 
 Each of the four hearings' prompts now requires exactly one word in the
