@@ -36,7 +36,7 @@ above is scoring and theme around that same core loop.
 - `index.html` — the whole UI: hearing flow, countdown meter, Web Speech API
   scoring, Web Audio tones, all inline `<style>`/`<script>`, no build step.
 - `server.js` — a small zero-dependency Node server. Serves `index.html` and
-  proxies twister requests to OpenAI so the API key never reaches the browser
+  proxies twister requests to LiteLLM so the API key never reaches the browser
   or the repo.
 - `.env.example` — template for required environment variables.
 
@@ -44,7 +44,7 @@ above is scoring and theme around that same core loop.
 
 ```
 cp .env.example .env.local
-# edit .env.local and set a real OPENAI_API_KEY
+# edit .env.local and set LITELLM_BASE_URL and LITELLM_API_KEY
 node server.js
 ```
 
